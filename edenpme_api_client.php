@@ -10,9 +10,9 @@ class edenpme_api
 		}
 		
 	// mise à jour d'un élément
-	function update($parametres)
+	function update($parametres, $methode = 'maj')
 		{
-		$parametres['methode'] = 'maj';
+		$parametres['methode'] = $methode;
 		
 		return $this->call($parametres);
 		}
@@ -59,7 +59,7 @@ class edenpme_api
 		$parametres['PHP_AUTH_USER'] = $this->api_user;
 		$parametres['PHP_AUTH_PW'] = $this->api_pwd;
 		
-		var_dump($parametres);
+		// var_dump($parametres);
 		
 		// Création d'une nouvelle ressource cURL
 		$ch = curl_init();
@@ -70,18 +70,25 @@ class edenpme_api
 		curl_setopt($ch, CURLOPT_HEADER, 0);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);  
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
+		curl_setopt($ch, CURLOPT_SSLVERSION, 3); 
 		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array('param' => json_encode($parametres))));
 		curl_setopt($ch, CURLOPT_HTTPAUTH, 'CURLAUTH_NTLM'); 
 		curl_setopt($ch, CURLOPT_USERPWD, $this->api_user.':'.$this->api_pwd); 
 		
 		// var_dump($this->api_user.':'.$this->api_pwd);
 
-		// Récupération de l'URL et affichage sur le naviguateur
 		$return = curl_exec($ch);
-		
+		  
+		// Recupération des erreurs
+		$CurlErr  = curl_error($ch);
+
 		// Fermeture de la session cURL
 		curl_close($ch);
-		
+
+		// On retourne l'erreur (si y'en a une...)
+		if($CurlErr) 
+			return $CurlErr;
+     
 		return $return;
 		}
 	}
